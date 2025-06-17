@@ -50,10 +50,10 @@ O **Barbearia Tulla** é um aplicativo móvel moderno que permite aos clientes a
 ```
 barbearia-app/
 ├── app/                    # Telas do aplicativo
-│   ├── HomeScreen.jsx
-│   ├── AgendamentoScreen.jsx
-│   ├── ConfirmacaoScreen.jsx
-│   └── MeusAgendamentosScreen.jsx
+│   ├── HomeScreen.js
+│   ├── AgendamentoScreen.js
+│   ├── ConfirmacaoScreen.js
+│   └── MeusAgendamentosScreen.js
 ├── services/               # Lógica de banco de dados
 │   └── database.js
 ├── utils/                  # Funções auxiliares
