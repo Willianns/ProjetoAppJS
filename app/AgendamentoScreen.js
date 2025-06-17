@@ -1,3 +1,4 @@
+// Importações necessárias do React e React Native
 import React, { useState } from 'react';
 import {
   View,
@@ -11,25 +12,33 @@ import {
   Modal,
   FlatList,
 } from 'react-native';
+
+// Hook para navegação entre telas
 import { useNavigation } from '@react-navigation/native';
+
+// Importa constantes e funções auxiliares
 import { SERVICOS, HORARIOS_DISPONIVEIS } from "../utils/constants.js";
 import { isValidDate, isValidTime, isFutureDateTime, isValidName } from "../utils/validation.js";
 import { DatabaseService } from "../services/database.js";
 
+// Componente principal da tela de agendamento
 export default function AgendamentoScreen() {
-  const navigation = useNavigation();
-  
+  const navigation = useNavigation(); // Para navegação entre telas
+
+  // Estado para armazenar dados do formulário
   const [formData, setFormData] = useState({
     nomeCliente: '',
     data: '',
     hora: '',
     servico: 'corte',
   });
-  
+
+  // Estado para loading e visibilidade dos modais
   const [loading, setLoading] = useState(false);
   const [showServicoModal, setShowServicoModal] = useState(false);
   const [showHorarioModal, setShowHorarioModal] = useState(false);
 
+  // Função para atualizar os campos do formulário
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -37,6 +46,7 @@ export default function AgendamentoScreen() {
     }));
   };
 
+  // Validação do formulário
   const validateForm = () => {
     if (!isValidName(formData.nomeCliente)) {
       Alert.alert('Erro', 'Por favor, insira um nome válido (mínimo 2 caracteres).');
@@ -61,13 +71,14 @@ export default function AgendamentoScreen() {
     return true;
   };
 
+  // Função chamada ao confirmar o agendamento
   const handleConfirmarAgendamento = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) return; // Se não for válido, cancela
 
-    setLoading(true);
-    
+    setLoading(true); // Mostra carregamento
+
     try {
-      // Verificar disponibilidade
+      // Verifica se o horário está disponível
       const disponivel = await DatabaseService.verificarDisponibilidade(formData.data, formData.hora);
       
       if (!disponivel) {
@@ -76,9 +87,10 @@ export default function AgendamentoScreen() {
         return;
       }
 
-      // Salvar agendamento
+      // Salva o agendamento no banco
       const agendamento = await DatabaseService.salvarAgendamento(formData);
-      
+
+      // Mostra alerta de sucesso e navega para tela de confirmação
       Alert.alert(
         'Sucesso!',
         'Agendamento realizado com sucesso!',
@@ -90,12 +102,14 @@ export default function AgendamentoScreen() {
         ]
       );
     } catch (error) {
+      // Erro na tentativa de agendamento
       Alert.alert('Erro', 'Não foi possível realizar o agendamento. Tente novamente.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Função para retornar o nome do serviço a partir do valor
   const getServicoLabel = (servico) => {
     return SERVICOS.find(s => s.value === servico)?.label || servico;
   };
@@ -104,8 +118,8 @@ export default function AgendamentoScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Agendar Horário</Text>
-        
-        {/* Nome do Cliente */}
+
+        {/* Campo Nome do Cliente */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Nome do Cliente</Text>
           <TextInput
@@ -117,7 +131,7 @@ export default function AgendamentoScreen() {
           />
         </View>
 
-        {/* Data */}
+        {/* Campo Data */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Data (dd/mm/yyyy)</Text>
           <TextInput
@@ -130,7 +144,7 @@ export default function AgendamentoScreen() {
           />
         </View>
 
-        {/* Hora */}
+        {/* Campo Horário */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Horário</Text>
           <TouchableOpacity
@@ -143,7 +157,7 @@ export default function AgendamentoScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Serviço */}
+        {/* Campo Serviço */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Serviço</Text>
           <TouchableOpacity
@@ -156,7 +170,7 @@ export default function AgendamentoScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Botão Confirmar */}
+        {/* Botão Confirmar Agendamento */}
         <TouchableOpacity
           style={[styles.confirmarButton, loading && styles.disabledButton]}
           onPress={handleConfirmarAgendamento}
@@ -168,7 +182,7 @@ export default function AgendamentoScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Modal de Seleção de Serviço */}
+      {/* Modal para seleção de serviço */}
       <Modal
         visible={showServicoModal}
         transparent={true}
@@ -200,7 +214,7 @@ export default function AgendamentoScreen() {
         </View>
       </Modal>
 
-      {/* Modal de Seleção de Horário */}
+      {/* Modal para seleção de horário */}
       <Modal
         visible={showHorarioModal}
         transparent={true}
@@ -239,6 +253,7 @@ export default function AgendamentoScreen() {
   );
 }
 
+// Estilos da interface
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -358,4 +373,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-

@@ -10,25 +10,28 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { DatabaseService } from "../services/database.js";
-import { formatDate, formatTime } from "../utils/validation.js";
-import { SERVICOS } from "../utils/constants.js";
+import { DatabaseService } from "../services/database.js"; // Serviço para lidar com o banco de dados local
+import { formatDate, formatTime } from "../utils/validation.js"; // Funções para formatar data e hora
+import { SERVICOS } from "../utils/constants.js"; // Lista de serviços disponíveis
 
 export default function MeusAgendamentosScreen() {
-  const navigation = useNavigation();
-  const [agendamentos, setAgendamentos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation(); // Hook para navegação entre telas
+  const [agendamentos, setAgendamentos] = useState([]); // Lista de agendamentos
+  const [loading, setLoading] = useState(true); // Estado de carregamento inicial
+  const [refreshing, setRefreshing] = useState(false); // Estado de "puxar para atualizar"
 
+  // Função para carregar os agendamentos do banco de dados
   const carregarAgendamentos = async () => {
     try {
       const agendamentosCarregados = await DatabaseService.obterAgendamentos();
-      // Ordenar por data e hora (mais recentes primeiro)
+      
+      // Ordena do mais recente para o mais antigo
       const agendamentosOrdenados = agendamentosCarregados.sort((a, b) => {
         const dataA = new Date(a.createdAt);
         const dataB = new Date(b.createdAt);
         return dataB.getTime() - dataA.getTime();
       });
+
       setAgendamentos(agendamentosOrdenados);
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error);
@@ -39,31 +42,31 @@ export default function MeusAgendamentosScreen() {
     }
   };
 
-  // Carregar agendamentos quando a tela ganhar foco
+  // Executa carregarAgendamentos toda vez que a tela for focada
   useFocusEffect(
     useCallback(() => {
       carregarAgendamentos();
     }, [])
   );
 
+  // Função para o refresh com pull
   const onRefresh = () => {
     setRefreshing(true);
     carregarAgendamentos();
   };
 
+  // Retorna o nome do serviço com base no value
   const getServicoLabel = (servico) => {
     return SERVICOS.find(s => s.value === servico)?.label || servico;
   };
 
+  // Função para confirmar e cancelar um agendamento
   const handleCancelarAgendamento = (agendamento) => {
     Alert.alert(
       'Cancelar Agendamento',
       `Deseja realmente cancelar o agendamento de ${agendamento.nomeCliente} para ${agendamento.data} às ${agendamento.hora}?`,
       [
-        {
-          text: 'Não',
-          style: 'cancel',
-        },
+        { text: 'Não', style: 'cancel' },
         {
           text: 'Sim, Cancelar',
           style: 'destructive',
@@ -72,7 +75,7 @@ export default function MeusAgendamentosScreen() {
               const sucesso = await DatabaseService.deletarAgendamento(agendamento.id);
               if (sucesso) {
                 Alert.alert('Sucesso', 'Agendamento cancelado com sucesso!');
-                carregarAgendamentos(); // Recarregar a lista
+                carregarAgendamentos(); // Recarrega após deletar
               } else {
                 Alert.alert('Erro', 'Não foi possível cancelar o agendamento.');
               }
@@ -85,7 +88,9 @@ export default function MeusAgendamentosScreen() {
     );
   };
 
+  // Função para exibir cada cartão de agendamento
   const renderAgendamento = (agendamento) => {
+    // Converte a data e hora para objeto Date
     const dataAgendamento = agendamento.data.split('/');
     const horaAgendamento = agendamento.hora.split(':');
     const dataCompleta = new Date(
@@ -95,12 +100,14 @@ export default function MeusAgendamentosScreen() {
       parseInt(horaAgendamento[0]),
       parseInt(horaAgendamento[1])
     );
-    
+
+    // Verifica se o agendamento já passou
     const agora = new Date();
     const isPassado = dataCompleta < agora;
 
     return (
       <View key={agendamento.id} style={[styles.agendamentoCard, isPassado && styles.agendamentoPassado]}>
+        {/* Cabeçalho do agendamento */}
         <View style={styles.agendamentoHeader}>
           <Text style={styles.nomeCliente}>{agendamento.nomeCliente}</Text>
           <Text style={[styles.statusText, isPassado ? styles.statusPassado : styles.statusFuturo]}>
@@ -108,6 +115,7 @@ export default function MeusAgendamentosScreen() {
           </Text>
         </View>
         
+        {/* Detalhes do agendamento */}
         <View style={styles.agendamentoDetalhes}>
           <View style={styles.detalheItem}>
             <Text style={styles.detalheLabel}>📅 Data:</Text>
@@ -130,6 +138,7 @@ export default function MeusAgendamentosScreen() {
           </View>
         </View>
 
+        {/* Botão para cancelar, se o agendamento ainda for futuro */}
         {!isPassado && (
           <TouchableOpacity
             style={styles.cancelarButton}
@@ -142,6 +151,7 @@ export default function MeusAgendamentosScreen() {
     );
   };
 
+  // Tela de carregamento
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -152,6 +162,7 @@ export default function MeusAgendamentosScreen() {
     );
   }
 
+  // Tela principal
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -162,6 +173,7 @@ export default function MeusAgendamentosScreen() {
       >
         <Text style={styles.title}>Meus Agendamentos</Text>
         
+        {/* Caso não existam agendamentos */}
         {agendamentos.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>📅</Text>
@@ -177,6 +189,7 @@ export default function MeusAgendamentosScreen() {
             </TouchableOpacity>
           </View>
         ) : (
+          // Lista de agendamentos
           <View style={styles.agendamentosContainer}>
             <Text style={styles.totalText}>
               Total: {agendamentos.length} agendamento{agendamentos.length !== 1 ? 's' : ''}
@@ -188,148 +201,3 @@ export default function MeusAgendamentosScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1a1a1a',
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#cccccc',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  totalText: {
-    fontSize: 16,
-    color: '#cccccc',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
-  },
-  emptyText: {
-    fontSize: 64,
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    color: '#cccccc',
-    textAlign: 'center',
-    marginBottom: 30,
-    lineHeight: 22,
-  },
-  agendarButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    alignItems: 'center',
-  },
-  agendarButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  agendamentosContainer: {
-    flex: 1,
-  },
-  agendamentoCard: {
-    backgroundColor: '#2a2a2a',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 15,
-    borderLeftWidth: 4,
-    borderLeftColor: '#4CAF50',
-  },
-  agendamentoPassado: {
-    borderLeftColor: '#666',
-    opacity: 0.7,
-  },
-  agendamentoHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  nomeCliente: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    flex: 1,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    textTransform: 'uppercase',
-  },
-  statusFuturo: {
-    backgroundColor: '#4CAF50',
-    color: '#ffffff',
-  },
-  statusPassado: {
-    backgroundColor: '#666',
-    color: '#ffffff',
-  },
-  agendamentoDetalhes: {
-    marginBottom: 15,
-  },
-  detalheItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 6,
-  },
-  detalheLabel: {
-    fontSize: 14,
-    color: '#cccccc',
-    flex: 1,
-  },
-  detalheValor: {
-    fontSize: 14,
-    color: '#ffffff',
-    fontWeight: '500',
-    textAlign: 'right',
-    flex: 2,
-  },
-  cancelarButton: {
-    backgroundColor: '#f44336',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-  },
-  cancelarButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-});
-

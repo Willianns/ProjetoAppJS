@@ -1,3 +1,4 @@
+// Importa o React e componentes nativos do React Native
 import React from 'react';
 import {
   View,
@@ -7,20 +8,29 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
+
+// Importa navegação e acesso a parâmetros de rota
 import { useNavigation, useRoute } from '@react-navigation/native';
+
+// Importa funções utilitárias para formatar data e hora
 import { formatDate, formatTime } from "../utils/validation.js";
+
+// Importa lista de serviços disponíveis
 import { SERVICOS } from '../utils/constants.js';
 
+// Componente principal da tela de confirmação
 export default function ConfirmacaoScreen() {
-  const navigation = useNavigation();
-  const route = useRoute();
+  const navigation = useNavigation(); // Permite navegação entre telas
+  const route = useRoute(); // Acesso aos parâmetros da tela atual
   
-  const { agendamento } = route.params;
+  const { agendamento } = route.params; // Extrai o objeto agendamento dos parâmetros
 
+  // Função para pegar o rótulo (label) do serviço escolhido
   const getServicoLabel = () => {
     return SERVICOS.find(s => s.value === agendamento.servico)?.label || agendamento.servico;
   };
 
+  // Função chamada ao clicar no botão "Voltar para Início"
   const handleVoltarHome = () => {
     navigation.navigate('Home');
   };
@@ -28,46 +38,55 @@ export default function ConfirmacaoScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Ícone de Sucesso */}
+
+        {/* Ícone de sucesso com check ✓ */}
         <View style={styles.successIcon}>
           <Text style={styles.checkmark}>✓</Text>
         </View>
 
-        {/* Título */}
+        {/* Título de sucesso */}
         <Text style={styles.title}>Agendamento Confirmado!</Text>
+
+        {/* Mensagem informativa */}
         <Text style={styles.subtitle}>
           Seu horário foi agendado com sucesso. Confira os detalhes abaixo:
         </Text>
 
-        {/* Detalhes do Agendamento */}
+        {/* Bloco de detalhes do agendamento */}
         <View style={styles.detailsContainer}>
+
+          {/* Nome do cliente */}
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Cliente:</Text>
             <Text style={styles.detailValue}>{agendamento.nomeCliente}</Text>
           </View>
 
+          {/* Data formatada */}
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Data:</Text>
             <Text style={styles.detailValue}>{formatDate(agendamento.data)}</Text>
           </View>
 
+          {/* Horário formatado */}
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Horário:</Text>
             <Text style={styles.detailValue}>{formatTime(agendamento.hora)}</Text>
           </View>
 
+          {/* Tipo de serviço */}
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>Serviço:</Text>
             <Text style={styles.detailValue}>{getServicoLabel()}</Text>
           </View>
 
+          {/* ID do agendamento */}
           <View style={styles.detailItem}>
             <Text style={styles.detailLabel}>ID do Agendamento:</Text>
             <Text style={styles.detailValue}>{agendamento.id}</Text>
           </View>
         </View>
 
-        {/* Informações Importantes */}
+        {/* Informações úteis/instruções para o cliente */}
         <View style={styles.infoContainer}>
           <Text style={styles.infoTitle}>Informações Importantes:</Text>
           <Text style={styles.infoText}>
@@ -84,7 +103,7 @@ export default function ConfirmacaoScreen() {
           </Text>
         </View>
 
-        {/* Botão Voltar para Home */}
+        {/* Botão que leva o usuário de volta à tela inicial */}
         <TouchableOpacity style={styles.voltarButton} onPress={handleVoltarHome}>
           <Text style={styles.voltarButtonText}>Voltar para Início</Text>
         </TouchableOpacity>
@@ -93,10 +112,11 @@ export default function ConfirmacaoScreen() {
   );
 }
 
+// Estilos da tela
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#1a1a1a', // Fundo escuro
   },
   scrollContent: {
     padding: 20,
@@ -107,7 +127,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#4CAF50', // Verde sucesso
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
@@ -200,4 +220,3 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
 });
-

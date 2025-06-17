@@ -1,21 +1,30 @@
+// Importa o módulo AsyncStorage para armazenamento local
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// Importa função utilitária para gerar IDs únicos
 import { generateId } from '../utils/validation.js';
 
+// Chave que será usada para salvar os dados no AsyncStorage
 const STORAGE_KEY = '@barbearia_agendamentos';
 
+// Classe responsável por lidar com o armazenamento dos agendamentos
 export class DatabaseService {
-  // Salvar um novo agendamento
+  // Salva um novo agendamento
   static async salvarAgendamento(agendamentoForm) {
     try {
+      // Cria um novo objeto de agendamento com ID único e data de criação
       const agendamento = {
         id: generateId(),
         ...agendamentoForm,
-        createdAt: new Date(),
+        createdAt: new Date(), // Marca quando o agendamento foi criado
       };
 
+      // Obtém os agendamentos existentes no armazenamento
       const agendamentosExistentes = await this.obterAgendamentos();
+
+      // Adiciona o novo agendamento à lista existente
       const novosAgendamentos = [...agendamentosExistentes, agendamento];
       
+      // Salva todos os agendamentos atualizados no AsyncStorage
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(novosAgendamentos));
       return agendamento;
     } catch (error) {
@@ -24,16 +33,18 @@ export class DatabaseService {
     }
   }
 
-  // Obter todos os agendamentos
+  // Retorna todos os agendamentos armazenados
   static async obterAgendamentos() {
     try {
+      // Lê os agendamentos salvos como string JSON
       const agendamentosString = await AsyncStorage.getItem(STORAGE_KEY);
       if (!agendamentosString) {
-        return [];
+        return []; // Nenhum agendamento encontrado
       }
       
       const agendamentos = JSON.parse(agendamentosString);
-      // Converter strings de data de volta para objetos Date
+
+      // Converte a string da data de criação para objeto Date
       return agendamentos.map(agendamento => ({
         ...agendamento,
         createdAt: new Date(agendamento.createdAt),
@@ -44,10 +55,11 @@ export class DatabaseService {
     }
   }
 
-  // Obter agendamento por ID
+  // Retorna um agendamento específico pelo ID
   static async obterAgendamentoPorId(id) {
     try {
       const agendamentos = await this.obterAgendamentos();
+      // Procura o agendamento pelo ID
       return agendamentos.find(agendamento => agendamento.id === id) || null;
     } catch (error) {
       console.error('Erro ao obter agendamento por ID:', error);
@@ -55,13 +67,15 @@ export class DatabaseService {
     }
   }
 
-  // Verificar se já existe agendamento para data/hora específica
+  // Verifica se há disponibilidade em uma data e hora específicas
   static async verificarDisponibilidade(data, hora) {
     try {
       const agendamentos = await this.obterAgendamentos();
+      // Verifica se já existe um agendamento com a mesma data e hora
       const agendamentoExistente = agendamentos.find(
         agendamento => agendamento.data === data && agendamento.hora === hora
       );
+      // Retorna true se estiver disponível
       return !agendamentoExistente;
     } catch (error) {
       console.error('Erro ao verificar disponibilidade:', error);
@@ -69,14 +83,17 @@ export class DatabaseService {
     }
   }
 
-  // Deletar agendamento (para funcionalidades futuras)
+  // Remove um agendamento específico pelo ID
   static async deletarAgendamento(id) {
     try {
       const agendamentos = await this.obterAgendamentos();
+
+      // Filtra os agendamentos para remover o com o ID especificado
       const agendamentosFiltrados = agendamentos.filter(
         agendamento => agendamento.id !== id
       );
       
+      // Salva os agendamentos atualizados no AsyncStorage
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(agendamentosFiltrados));
       return true;
     } catch (error) {
@@ -85,7 +102,7 @@ export class DatabaseService {
     }
   }
 
-  // Limpar todos os agendamentos (para desenvolvimento/testes)
+  // Remove todos os agendamentos do armazenamento (útil para testes)
   static async limparAgendamentos() {
     try {
       await AsyncStorage.removeItem(STORAGE_KEY);
@@ -94,4 +111,3 @@ export class DatabaseService {
     }
   }
 }
-
