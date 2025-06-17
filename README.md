@@ -204,6 +204,9 @@ Este projeto é de uso educacional e demonstrativo.
 
 ---
 
+**apk do Projeto**
+https://expo.dev/artifacts/eas/R63F7wEvcbNKmeNfszN41.apk
+
 **Versão**: 1.0.0  
 **Última atualização**: Dezembro 2024  
 **Compatibilidade**: React Native 0.79.3, Expo SDK 53
