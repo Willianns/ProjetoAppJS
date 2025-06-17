@@ -200,7 +200,7 @@ Este projeto é de uso educacional e demonstrativo.
 
 ## 👨‍💻 Desenvolvido por
 
-**Manus AI** - Assistente de desenvolvimento de software
+**Willian**, **Maicon** e **Vinicius**. 
 
 ---
 
