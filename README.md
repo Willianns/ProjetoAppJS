@@ -38,7 +38,7 @@ O **Barbearia Tulla** é um aplicativo móvel moderno que permite aos clientes a
 ## 🛠️ Tecnologias Utilizadas
 
 - **React Native**: Framework principal
-- **JavaScript**: Linguagem de programação (sem TypeScript)
+- **JavaScript**: Linguagem de programação
 - **Expo**: Plataforma de desenvolvimento
 - **React Navigation**: Navegação entre telas
 - **AsyncStorage**: Persistência de dados local
